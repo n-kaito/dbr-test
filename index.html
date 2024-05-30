@@ -5,8 +5,6 @@
 <textarea id="results" style="width: 100%; min-height: 10vh; font-size: 3vmin; overflow: auto" disabled></textarea>
 <script src="https://cdn.jsdelivr.net/npm/dynamsoft-barcode-reader-bundle@10.2.1000/dist/dbr.bundle.js"></script>
 <script>
-  const audio = new Audio('beep.mp3');
-  audio.volume = 1;
   // ライセンスを初期化
   Dynamsoft.License.LicenseManager.initLicense("DLS2eyJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSJ9");
   // wasm リソースを事前にロードして、ビデオの再生とバーコードのデコード間の遅延を減らす
@@ -25,7 +23,7 @@
     // 処理結果をリスニングオブジェクトに設定
     cvRouter.addResultReceiver({ onDecodedBarcodesReceived: (result) => {
       if (result.barcodeResultItems.length > 0) {
-        audio.play();
+        Dynamsoft.DCE.Feedback.beep();
 
         resultsContainer.textContent = '';
         for (let item of result.barcodeResultItems) {
