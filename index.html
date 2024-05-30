@@ -12,9 +12,9 @@
   // wasm リソースを事前にロードして、ビデオの再生とバーコードのデコード間の遅延を減らす
   Dynamsoft.Core.CoreModule.loadWasm(["dbr"]);
   (async () => {
-    // プロセス全体を制御するCaptureVisionRouterオブジェクトを作成
+    // プロセス全体を制御するオブジェクトを作成
     let cvRouter = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
-
+    // ウェブページでビデオ ストリーミングを有効にする
     let view = await Dynamsoft.DCE.CameraView.createInstance();
     let cameraEnhancer = await Dynamsoft.DCE.CameraEnhancer.createInstance(view);
     document.querySelector("#cameraViewContainer").append(view.getUIElement());
@@ -44,7 +44,7 @@
 
     await cameraEnhancer.open();
     // 「ReadSingleBarcode」を指定してプロセスを開始
-    await cvRouter.startCapturing("ReadSingleBarcode");
+    await cvRouter.startCapturing("ReadBarcodes_Default");
   })();
 </script>
 </body>
