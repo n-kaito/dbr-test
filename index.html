@@ -5,19 +5,28 @@
 <textarea id="results" style="width: 100%; min-height: 10vh; font-size: 3vmin; overflow: auto" disabled></textarea>
 <script src="https://cdn.jsdelivr.net/npm/dynamsoft-barcode-reader-bundle@10.2.1000/dist/dbr.bundle.js"></script>
 <script>
+  const audio = new Audio('beep.mp3');
+  audio.volume = 100;
+  // ライセンスを初期化
   Dynamsoft.License.LicenseManager.initLicense("DLS2eyJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSJ9");
+  // wasm リソースを事前にロードして、ビデオの再生とバーコードのデコード間の遅延を減らす
   Dynamsoft.Core.CoreModule.loadWasm(["dbr"]);
   (async () => {
+    // プロセス全体を制御するCaptureVisionRouterオブジェクトを作成
     let cvRouter = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
 
     let view = await Dynamsoft.DCE.CameraView.createInstance();
     let cameraEnhancer = await Dynamsoft.DCE.CameraEnhancer.createInstance(view);
     document.querySelector("#cameraViewContainer").append(view.getUIElement());
+    // 画像ソースから画像を取得する
     cvRouter.setInput(cameraEnhancer);
 
     const resultsContainer = document.querySelector("#results");
+    // 処理結果をリスニングオブジェクトに設定
     cvRouter.addResultReceiver({ onDecodedBarcodesReceived: (result) => {
       if (result.barcodeResultItems.length > 0) {
+        audio.play();
+
         resultsContainer.textContent = '';
         for (let item of result.barcodeResultItems) {
           resultsContainer.textContent += `${item.formatString}: ${item.text}\n\n`;
@@ -25,12 +34,16 @@
       }
     }});
 
+    // 処理結果をフィルタリング
     let filter = new Dynamsoft.Utility.MultiFrameResultCrossFilter();
+    // 複数のフレームにわたって結果を検証
     filter.enableResultCrossVerification("barcode", true);
+    // 短期間で検出された重複結果を排除
     filter.enableResultDeduplication("barcode", true);
     await cvRouter.addResultFilter(filter);
 
     await cameraEnhancer.open();
+    // 「ReadSingleBarcode」を指定してプロセスを開始
     await cvRouter.startCapturing("ReadSingleBarcode");
   })();
 </script>
